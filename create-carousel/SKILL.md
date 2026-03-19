@@ -20,7 +20,7 @@ Each slide follows this layout (1080 × 1080 px):
 │    spanning two or                  │
 │    three lines."                    │
 │                                     │
-│                                [🔇] │  ← optional mute icon
+│                                     │ 
 └─────────────────────────────────────┘
 ```
 
