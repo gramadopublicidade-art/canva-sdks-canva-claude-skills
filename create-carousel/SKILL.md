@@ -85,9 +85,7 @@ Wait for the user to approve or adjust the slide content. This is the **only app
 
 ### Step 3: Generate the Carousel Design
 
-Call `Canva:generate-design` with:
-- `design_type`: `"instagram_post"` (1080 × 1080 px)
-- `query`: a detailed prompt following the format below
+Call `generate-design` with a detailed prompt following the format below. After calling it, immediately call `get-design-generation-job` with the returned job ID to poll for completion (retry every 3–5 seconds until status is `"success"`).
 
 #### Generation Query Format
 
@@ -121,10 +119,10 @@ Generate 3 visual style variations (different typography weight, quote placement
 
 ### Step 4: Finalize
 
+- Poll `get-design-generation-job` until the job completes
 - Show the generated candidates to the user
 - Ask which candidate they prefer (or if they want adjustments)
-- Call `Canva:create-design-from-candidate` with the selected candidate
-- Provide the Canva edit link so the user can fine-tune avatar, fonts, or any slide
+- Once approved, use `export-design` to export the final design or provide the Canva edit link returned by the job so the user can fine-tune avatar, fonts, or any slide
 
 ---
 
@@ -153,4 +151,4 @@ Always include a call-to-action slide. Examples:
 - If the user provides a photo URL, pass it to the generation query as the avatar source
 - The Twitter/X style works equally well for Portuguese, Spanish, and English content — match the quote language to the user's language
 - After generating, remind the user they can use the `resize-for-social-media` skill to export the carousel to Facebook, LinkedIn, and other platforms
-- If `Canva:generate-design` is not available, inform the user that this skill requires Claude Desktop with the Canva MCP integration
+- This skill requires Claude Desktop with the native Canva connector configured. Required tools: `generate-design` and `get-design-generation-job`. If these are not available, ask the user to connect the Canva integration in Claude Desktop settings.
