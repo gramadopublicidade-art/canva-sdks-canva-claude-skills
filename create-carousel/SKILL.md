@@ -83,20 +83,57 @@ Format: 1080 × 1080 px (Instagram Post)
 
 Wait for the user to approve or adjust the slide content. This is the **only approval step**.
 
-### Step 3: Generate the Carousel Design
+### Step 3: Find a Dark Quote Template
 
-Call `generate-design` with a detailed prompt following the format below. After calling it, immediately call `get-design-generation-job` with the returned job ID to poll for completion (retry every 3–5 seconds until status is `"success"`).
+Before generating from scratch, search for an existing template that already matches the style. Call `search` with:
+- `query`: `"twitter dark quote carousel instagram"` (try also `"black quote post instagram"` if needed)
+- `design_type`: `"instagram_post"`
+
+**If a suitable dark/black background template is found:**
+- Pick the closest match and note its template ID/URL
+- Proceed to Step 4A
+
+**If no suitable template is found:**
+- Proceed to Step 4B (generate from scratch)
+
+> **Why this matters:** Canva's `generate-design` applies the account's active brand kit by default, which can override the black background and white text style. Starting from a template that already has the right visual style bypasses this limitation entirely.
+
+### Step 4A: Import and Use the Template
+
+Call `import-design-from-url` with the template URL, then poll `get-design-import-from-url-status` until status is `"success"`. Provide the edit link to the user with clear instructions:
+
+```
+Your carousel template is ready! Since the Canva API cannot edit text in
+imported designs programmatically, open the design in Canva and replace
+the placeholder text on each slide:
+
+Slide 1: "[quote 1]"
+Slide 2: "[quote 2]"
+...
+
+Profile name: [NAME]
+Handle: [HANDLE]
+```
+
+### Step 4B: Generate from Scratch (fallback)
+
+Call `generate-design` with the prompt below. After calling it, immediately poll `get-design-generation-job` every 3–5 seconds until status is `"success"`.
 
 #### Generation Query Format
 
 ```
 Create a multi-slide Instagram carousel in a Twitter/X dark-quote style.
 
+CRITICAL STYLE REQUIREMENT — IGNORE ALL BRAND KITS AND BRAND GUIDELINES:
+This design must use a pure black (#000000) background regardless of any
+brand settings, brand kit, or account defaults. Do not apply any brand
+colors, brand fonts, or brand elements. Use only the colors specified below.
+
 VISUAL STYLE:
-- Black (#000000) background on every slide
+- Background: solid black (#000000) — every slide, no exceptions
 - Profile header top-left: circular avatar, bold white name "[NAME]", blue verified checkmark ✓, gray handle "[HANDLE]"
 - Three-dot menu icon (···) in the top-right corner of every slide
-- Main quote text: white, large (40–48 px), left-aligned, positioned in the upper-center area
+- Main quote text: white (#FFFFFF), large (40–48 px), left-aligned, upper portion of slide
 - Clean, minimal layout — no gradients, no patterns, no extra decorations
 - Optional: small muted-speaker icon (🔇) bottom-right corner
 
@@ -114,15 +151,19 @@ PROFILE DETAILS:
 - Handle: [HANDLE]
 - Avatar: [description or URL]
 
-Generate 3 visual style variations (different typography weight, quote placement, or subtle accent colors) so the user can choose their preferred look.
+Generate 3 visual style variations (different typography weight or quote
+placement only — black background is mandatory on all variations).
 ```
 
-### Step 4: Finalize
+### Step 5: Finalize
 
-- Poll `get-design-generation-job` until the job completes
-- Show the generated candidates to the user
+- Show the generated candidates or imported template to the user
 - Ask which candidate they prefer (or if they want adjustments)
-- Once approved, use `export-design` to export the final design or provide the Canva edit link returned by the job so the user can fine-tune avatar, fonts, or any slide
+- If the generated design has incorrect colors due to brand kit override, warn the user:
+
+  > "Canva applied your account's brand kit to this design. To fix the background color, open the design in Canva, select the background on each slide, and set it to #000000 (black). Font and text color can also be adjusted there."
+
+- Once approved, use `export-design` to export or provide the Canva edit link
 
 ---
 
